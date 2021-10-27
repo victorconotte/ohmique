@@ -23,14 +23,16 @@ import random
 random.seed(9001)
 from random import randint
 import statistics
+import matplotlib.pyplot as plt
+matplotlib.use("Agg")
 
-__author__ = "Your Name"
+__author__ = "Victor Conotte"
 __copyright__ = "Universite Paris Diderot"
-__credits__ = ["Your Name"]
+__credits__ = ["Victor Conotte"]
 __license__ = "GPL"
 __version__ = "1.0.0"
-__maintainer__ = "Your Name"
-__email__ = "your@email.fr"
+__maintainer__ = "Victor Conotte"
+__email__ = "victorconotte@live.fr"
 __status__ = "Developpement"
 
 def isfile(path):
@@ -68,19 +70,40 @@ def get_arguments():
 
 
 def read_fastq(fastq_file):
-    pass
+    with open(fastq_file, "r") as fic:
+        for nb_line, n in enumerate(fic):
+            if nb_line % 4 == 1:
+                yield n.strip()
 
 
 def cut_kmer(read, kmer_size):
-    pass
+    decal = 0
+    seq_length = len(read)
+    while decal + kmer_size <= seq_length:
+        yield read[decal:(decal + kmer_size)]
+        decal += 1
 
 
 def build_kmer_dict(fastq_file, kmer_size):
-    pass
+    reads = read_fastq(fastq_file)
+    kmer_count = {}
+    for read in reads:
+        kmers = cut_kmer(read, kmer_size)
+        for kmer in kmers:
+            if not kmer in kmer_count:
+                kmer_count[kmer] = 1
+            else:
+                kmer_count[kmer] += 1
+    return kmer_count
 
 
 def build_graph(kmer_dict):
-    pass
+    graph = nx.DiGraph()
+    for km in kmer_dict.keys():
+        p = km[:-1]
+        s = km[1:]
+        graph.add_edge(p, s, weight=kmer_dict[km])
+    return graph
 
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
@@ -162,13 +185,14 @@ def main():
     """
     # Get arguments
     args = get_arguments()
-
+    print("test")
+    graph = build_graph(build_kmer_dict(args.fastq_file, args.kmer_size))
     # Fonctions de dessin du graphe
     # A decommenter si vous souhaitez visualiser un petit 
     # graphe
     # Plot the graph
-    # if args.graphimg_file:
-    #     draw_graph(graph, args.graphimg_file)
+    if args.graphimg_file:
+        draw_graph(graph, args.graphimg_file)
     # Save the graph in file
     # if args.graph_file:
     #     save_graph(graph, args.graph_file)
