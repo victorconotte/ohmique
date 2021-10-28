@@ -218,19 +218,21 @@ def get_sink_nodes(graph):
 
 def get_contigs(graph, starting_nodes, ending_nodes):
     contigs = []
-    for node_start in starting_nodes:
-        for node_end in ending_nodes:
-                path = nx.shortest_path(graph, node_start, node_end)
-                contig = "".join([node[0] for node in path[:-1]] + [path[-1]])
+    for start_node in starting_nodes:
+        for sink_node in ending_nodes:
+            for path in nx.all_simple_paths(graph, start_node, sink_node):
+                contig = path[0]
+                for i in range(1, len(path)):
+                    contig += path[i][-1]
                 contigs.append((contig, len(contig)))
     return contigs
 
 def save_contigs(contigs_list, output_file):
-    entete = ">contig_{} len={}\n"
-    with open(output_file, "w") as f:
+   entt = ">contig_{} len={}\n"
+   with open(output_file, "w") as fichiersortie:
         for i, contig in enumerate(contigs_list):
-            f.write(entete.format(i, contig[1]))
-            f.write(fill(contig[0])+"\n")
+            fichiersortie.write(entt.format(i, contig[1]))
+            fichiersortie.write(fill(contig[0])+ "\n")
 
 
 def fill(text, width=80):
@@ -287,9 +289,11 @@ def main():
     graph=simplify_bubbles(graph)
     starting_nodes = get_starting_nodes(graph)
     ending_nodes = get_sink_nodes(graph)
+    
     graph=solve_entry_tips(graph, starting_nodes)
     graph=solve_out_tips(graph, ending_nodes)
-    
+    starting_nodes = get_starting_nodes(graph)
+    ending_nodes = get_sink_nodes(graph)
     contigs = get_contigs(graph,starting_nodes,ending_nodes)
     save_contigs(contigs, args.output_file)
     print(starting_nodes)
