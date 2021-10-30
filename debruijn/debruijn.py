@@ -292,12 +292,11 @@ def main():
     
     graph=solve_entry_tips(graph, starting_nodes)
     graph=solve_out_tips(graph, ending_nodes)
-    starting_nodes = get_starting_nodes(graph)
-    ending_nodes = get_sink_nodes(graph)
-    contigs = get_contigs(graph,starting_nodes,ending_nodes)
+    starting_nodes_2 = get_starting_nodes(graph)
+    ending_nodes_2 = get_sink_nodes(graph)
+    contigs = get_contigs(graph,starting_nodes_2,ending_nodes_2)
     save_contigs(contigs, args.output_file)
-    print(starting_nodes)
-    print(ending_nodes)
+
     if args.graphimg_file:
         draw_graph(graph, args.graphimg_file)
 
